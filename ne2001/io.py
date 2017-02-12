@@ -16,7 +16,7 @@ def read_gc(ifile='ne_gc.json'):
 
     """
     # Read
-    with open(ifile, 'rt') as fh:
+    with open(data_path+ifile, 'rt') as fh:
         gc_dict = json.load(fh)
     # Return
     return gc_dict

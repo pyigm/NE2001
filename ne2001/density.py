@@ -3,11 +3,12 @@ Mirrors density.NE2001.f
 """
 
 import numpy as np
+import pdb
 
 import ne2001
 from ne2001 import io as io_ne2001
 
-def ne_GC(x, y, z, F_gc, original=True):
+def ne_GC(x, y, z, original=True):
     """
     c-----------------------------------------------------------------------
     c     Determines the contribution of the Galactic center to the free
@@ -59,7 +60,7 @@ def ne_GC(x, y, z, F_gc, original=True):
     #real n1h1,h1,A1,F1,n2,h2,A2,F2,na,ha,wa,Aa,Fa
     #common /galparams/ n1h1,h1,A1,F1,n2,h2,A2,F2,
     # .                na,ha,wa,Aa,Fa
-
+    # Coordinate output as float or array
     if isinstance(x,float):
         ne_gc = 0.
         F_gc = 0.
@@ -73,11 +74,11 @@ def ne_GC(x, y, z, F_gc, original=True):
 
     # GALACTOCENTRIC RADIUS
     rr = np.sqrt( (x-xgc)**2 + (y-ygc)**2)
-    gd_rgc = rr > gc_dict['rgc'] # truncate at 1/e point
+    gd_rgc = rr < gc_dict['rgc'] # truncate at 1/e point
 
     # Z-HEIGHT.
     zz = np.abs(z-zgc)
-    gd_zz = zz > gc_dict['hgc']
+    gd_zz = zz < gc_dict['hgc']
 
     # Close enough?
     arg = (rr/gc_dict['rgc'])**2 + (zz/gc_dict['hgc'])**2

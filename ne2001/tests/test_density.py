@@ -7,34 +7,34 @@ import pytest
 import os
 import numpy as np
 
-from specdb import utils
+from ne2001 import density
 
-from ..specdb import IgmSpec
 
 def data_path(filename):
     data_dir = os.path.join(os.path.dirname(__file__), 'files')
     return os.path.join(data_dir, filename)
 
-version = 'v02'
-@pytest.fixture
-def igmsp():
-    db_file = data_path('IGMspec_DB_{:s}_debug.hdf5'.format(version))
-    igmsp = IgmSpec(db_file=db_file)
-    return igmsp
+def test_GC():
+    """ Test Galactic Center density
+    Returns
+    -------
+
+    """
+    # Original
+    # Float
+    x,y,z = 0.,0.,0.
+    ne_GC, Fgc = density.ne_GC(x,y,z, original=True)
+    assert np.isclose(ne_GC,10.)
+    # Array
+    z = np.linspace(-0.1, 0.1, 100)
+    x = np.zeros_like(z)
+    y = np.zeros_like(z)
+    ne_GC, Fgc = density.ne_GC(x,y,z, original=True)
+    assert np.isclose(ne_GC[np.argmin(np.abs(z-0.))], 10.)
+
+    # New (as written)
+    ne_GC, Fgc = density.ne_GC(x,y,z, original=False)
+    assert np.isclose(ne_GC[np.argmin(np.abs(z+0.02))], 9.9429412976538512)
 
 
-def test_clean_vstack(igmsp):
-    def run_tst(sdb):
-        # Load
-        tbls = []
-        for group in sdb.groups:
-            tbls.append(sdb[group].meta[0:1])
-        # Stack
-        stack = utils.clean_vstack(tbls, sdb.groups)
-    # Internal
-    run_tst(igmsp)
-    # Full IGMSpec
-    if os.getenv('IGMSPEC_DB') is not None:
-        tigmsp = IgmSpec()
-        run_tst(tigmsp)
 
