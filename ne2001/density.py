@@ -106,7 +106,7 @@ def ne_GC(x, y, z, FORTRAN_NE2001=True):
     return ne_gc, F_gc
 
 
-def ne_inner(x,y,z, gal_param, FORTRAN_NE2001=True):
+def ne_thin(x,y,z, gal_param, FORTRAN_NE2001=True):
     """
     Parameters
     ----------
@@ -149,7 +149,7 @@ def ne_inner(x,y,z, gal_param, FORTRAN_NE2001=True):
     return ne_inn, F_inner
 
 
-def ne_outer(x,y,z, gal_param):
+def ne_thick(x,y,z, gal_param):
     """
     c-----------------------------------------------------------------------
     c Thick disk component:

@@ -34,26 +34,37 @@ def test_GC():
     assert np.isclose(ne_GC[np.argmin(np.abs(z+0.02))], 9.9429412976538512)
 
 
-def test_inner():
+def test_thin():
     """ Test inner density algorithm
     """
     gal_param = ne_io.read_galparam()
     # Original
     # Float
     x,y,z = 1.,1.,0.1
-    ne_inner, F_inner = density.ne_inner(x,y,z, gal_param, FORTRAN_NE2001=True)
+    ne_inner, F_inner = density.ne_thin(x,y,z, gal_param, FORTRAN_NE2001=True)
     assert np.isclose(ne_inner,0.0091182655991105324, rtol=1e-7)
     # Array
     z = np.linspace(0.1, 1.0, 100)
     x = np.ones_like(z)
     y = np.ones_like(z)
-    ne_inner, F_inner = density.ne_inner(x,y,z, gal_param, FORTRAN_NE2001=True)
+    ne_inner, F_inner = density.ne_thin(x,y,z, gal_param, FORTRAN_NE2001=True)
     assert np.isclose(ne_inner[0],0.0091182655991105324, rtol=1e-7)
     # New (as written)
-    ne_inner, Finner = density.ne_inner(x,y,z,gal_param, FORTRAN_NE2001=False)
+    ne_inner, Finner = density.ne_thin(x,y,z,gal_param, FORTRAN_NE2001=False)
     assert np.isclose(ne_inner[0], 3.56190777e-02, rtol=1e-7)
 
-def test_outer():
+
+def test_thick():
     """ Test outer density algorithm
     """
     gal_param = ne_io.read_galparam()
+    # Float
+    x,y,z = 1.,10.,1
+    ne_out, F_inner = density.ne_thick(x,y,z, gal_param)
+    assert np.isclose(ne_out, 0.011686894112477935, rtol=1e-7)
+    # Array
+    z = np.linspace(0.1, 1.0, 100)
+    x = np.ones_like(z)
+    y = np.ones_like(z) * 10.
+    ne_out, F_inner = density.ne_thick(x,y,z, gal_param)
+    assert np.isclose(ne_out[-1], 0.011686894112477935, rtol=1e-7)
