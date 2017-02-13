@@ -8,7 +8,7 @@ import pdb
 import ne2001
 from ne2001 import io as io_ne2001
 
-def ne_GC(x, y, z, original=True):
+def ne_GC(x, y, z, FORTRAN_NE2001=True):
     """
     c-----------------------------------------------------------------------
     c     Determines the contribution of the Galactic center to the free
@@ -67,6 +67,8 @@ def ne_GC(x, y, z, original=True):
     elif isinstance(x,np.ndarray):
         ne_gc = np.zeros_like(x)
         F_gc = np.zeros_like(x)
+    else:
+        raise IOError("Bad input for x")
 
     # Load
     gc_dict = io_ne2001.read_gc()
@@ -86,7 +88,7 @@ def ne_GC(x, y, z, original=True):
     # Finish
     all_gd = gd_rgc & gd_zz & gd_arg
     if np.sum(all_gd) > 0:
-        if original:
+        if FORTRAN_NE2001:
             if isinstance(x,float):
                 ne_gc = gc_dict['negc0']
                 F_gc = gc_dict['Fgc0']
@@ -103,6 +105,44 @@ def ne_GC(x, y, z, original=True):
     # Return
     return ne_gc, F_gc
 
+def ne_inner(x,y,z, gal_param, FORTRAN_NE2001=True):
+    """
+    Parameters
+    ----------
+    x
+    y
+    z
+    gal_param : dict
 
-
-    return
+    Returns
+    -------
+    c-----------------------------------------------------------------------
+    c Thin disk (inner Galaxy) component:
+    c (referred to as 'Galactic center component' in circa TC93 density.f)
+    """
+    # Init
+    if isinstance(x,float):
+        g2 = 0.
+    elif isinstance(x,np.ndarray):
+        g2 = np.zeros_like(x)
+    else:
+        raise IOError("Bad input for x")
+    # r
+    rr=np.sqrt(x**2 + y**2)
+    if FORTRAN_NE2001:
+        rrarg=((rr-gal_param['A2'])/1.8)**2
+    else:
+        rrarg=((rr-gal_param['A2'])/gal_param['A2'])**2
+    # g2
+    gd_g2 = rrarg < 10.0
+    if np.sum(gd_g2) > 0:
+        if isinstance(x,float):
+            g2 = np.exp(-1*rrarg)
+        else:
+            g2[gd_g2] = np.exp(-1*rrarg[gd_g2])
+    # Calculate
+    ne2 = gal_param['n2']*g2/(np.cosh(z/gal_param['h2'])**2)
+    ne_inner = ne2
+    F_inner = gal_param['F2']
+    # Return
+    return ne_inner, F_inner
