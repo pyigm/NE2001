@@ -105,6 +105,7 @@ def ne_GC(x, y, z, FORTRAN_NE2001=True):
     # Return
     return ne_gc, F_gc
 
+
 def ne_inner(x,y,z, gal_param, FORTRAN_NE2001=True):
     """
     Parameters
@@ -142,7 +143,41 @@ def ne_inner(x,y,z, gal_param, FORTRAN_NE2001=True):
             g2[gd_g2] = np.exp(-1*rrarg[gd_g2])
     # Calculate
     ne2 = gal_param['n2']*g2/(np.cosh(z/gal_param['h2'])**2)
-    ne_inner = ne2
+    ne_inn = ne2
     F_inner = gal_param['F2']
     # Return
-    return ne_inner, F_inner
+    return ne_inn, F_inner
+
+
+def ne_outer(x,y,z, gal_param):
+    """
+    c-----------------------------------------------------------------------
+    c Thick disk component:
+    implicit none
+    real x,y,z, F_outer
+    """
+    #parameter(pihalf=3.14159 26535 89793 23846 264/2.0)
+# 	g1=sech2(rr/A1)/sech2(8.5/A1)		! TC93 function
+    if isinstance(x,float):
+        g1 = 0.
+    elif isinstance(x,np.ndarray):
+        g1 = np.zeros_like(x)
+    else:
+        raise IOError("Bad input for x")
+    # Sun cos
+    suncos = np.cos(np.pi*gal_param['rsun']/gal_param['A1']/2.)
+    # rr
+    rr=np.sqrt(x**2 + y**2)
+    gd_rr = rr <= gal_param['A1']
+    if np.sum(gd_rr) > 0:
+        if isinstance(x,float):
+            g1 = np.cos(np.pi*rr/gal_param['A1']/2.)/suncos
+        else:
+            g1[gd_rr] = np.cos(np.pi*rr[gd_rr]/gal_param['A1']/2.)/suncos
+    # ne1
+    ne1 = (gal_param['n1h1']/gal_param['h1'])*g1 / np.cosh(z/gal_param['h1'])**2
+    # Finish
+    ne_out = ne1
+    F_outer = gal_param['F1']
+
+    return ne_out, F_outer

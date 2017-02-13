@@ -53,3 +53,7 @@ def test_inner():
     ne_inner, Finner = density.ne_inner(x,y,z,gal_param, FORTRAN_NE2001=False)
     assert np.isclose(ne_inner[0], 3.56190777e-02, rtol=1e-7)
 
+def test_outer():
+    """ Test outer density algorithm
+    """
+    gal_param = ne_io.read_galparam()
