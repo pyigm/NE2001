@@ -35,6 +35,10 @@ def test_GC():
 
 def test_spiral():
     gal_param = ne_io.read_galparam()
+    # Float
+    x,y,z = 5., 5., 0.1
+    ne_spiral, which_arm = density.ne_spiral_arm(x,y,z, gal_param)
+    assert np.isclose(ne_spiral, 1.566644460667114e-05, rtol=1e-5)
     # Array
     x = np.linspace(1.0, 10.0, 100)
     y = np.ones_like(x)

@@ -1,11 +1,11 @@
 """ Module for density calculations
 Mirrors density.NE2001.f
 """
+from __future__ import print_function, absolute_import, division, unicode_literals
 
 import numpy as np
 import pdb
 
-import ne2001
 from ne2001 import io as io_ne2001
 
 def ne_GC(x, y, z, FORTRAN_NE2001=True):
@@ -232,14 +232,13 @@ def ne_spiral_arm(x,y,z, gal_param):
                 test3 = thxy[icutz[gd_wa]]-th3a
                 neg_t3 = test3 < 0
                 test3[neg_t3] += 360.
-                gd_t3 = (0. <= test3) & (test3 <  (th3b-th3a))
+                gd_t3 = (0. <= test3) & (test3 < (th3b-th3a))
                 if np.sum(gd_t3) > 0:
-                    arg=6.2831853*(thxy[icutz[gd_wa]][gd_t3]-th3a)/(th3b-th3a)
+                    arg = 6.2831853*(thxy[icutz[gd_wa]][gd_t3]-th3a)/(th3b-th3a)
                     fac = (1.+fac3min + (1.-fac3min)*np.cos(arg))/2.
                     fac = fac**4.0
                     # Update ga
                     ga[gd_t3] *= fac
-                    pdb.set_trace()
 
             # arm2 reweighting:
             if adict['armmap'][j] == 2:
@@ -283,6 +282,10 @@ def ne_spiral_arm(x,y,z, gal_param):
                 ga / (np.cosh(cutz[gd_wa]/(gal_param['harm{:d}'.format(jj)]*gal_param['ha']))**2))
     # Finish
     ne_arms_log_mod = nea
+
+    if flg_float:
+        nea = float(nea[0])
+        whicharm = int(whicharm[0])
 
     # Return
     return nea, whicharm
