@@ -40,11 +40,14 @@ def test_spiral():
     y = np.ones_like(x)
     z = np.linspace(0.1, 3.0, 100)
     ne_spiral, which_arm = density.ne_spiral_arm(x,y,z, gal_param)
+    assert np.isclose(ne_spiral[50], 3.0764961696160683e-06, rtol=1e-5)
+    assert which_arm[50] == 2
     # Go further out
     x = np.linspace(1.0, 20.0, 100)
     y = np.ones_like(x)
     z = np.ones_like(x) * 0.1
-    ne_spiral, which_arm = density.ne_spiral_arm(x,y,z, gal_param)
+    ne_spiral2, which_arm2 = density.ne_spiral_arm(x,y,z, gal_param)
+    assert np.isclose(ne_spiral2[50], 0.011097138978334706, rtol=1e-5)
 
 def test_thin():
     """ Test inner density algorithm
