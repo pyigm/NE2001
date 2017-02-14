@@ -33,6 +33,18 @@ def test_GC():
     ne_GC, Fgc = density.ne_GC(x,y,z, FORTRAN_NE2001=False)
     assert np.isclose(ne_GC[np.argmin(np.abs(z+0.02))], 9.9429412976538512)
 
+def test_spiral():
+    gal_param = ne_io.read_galparam()
+    # Array
+    x = np.linspace(1.0, 10.0, 100)
+    y = np.ones_like(x)
+    z = np.linspace(0.1, 3.0, 100)
+    ne_spiral, which_arm = density.ne_spiral_arm(x,y,z, gal_param)
+    # Go further out
+    x = np.linspace(1.0, 20.0, 100)
+    y = np.ones_like(x)
+    z = np.ones_like(x) * 0.1
+    ne_spiral, which_arm = density.ne_spiral_arm(x,y,z, gal_param)
 
 def test_thin():
     """ Test inner density algorithm
