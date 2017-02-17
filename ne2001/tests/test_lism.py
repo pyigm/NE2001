@@ -16,6 +16,22 @@ def data_path(filename):
     return os.path.join(data_dir, filename)
 
 
+def test_nelism():
+    """ Test Main run
+    """
+    ldict = ne_io.read_lism()
+    # Float at center
+    x,y,z = [ldict[key] for key in ['xlsb', 'ylsb', 'zlsb']]
+    neLISM, FLISM, wLISM = lism.ne_LISM(x,y,z, ldict)
+    assert np.isclose(neLISM, 0.016)
+    # Array
+    z = np.linspace(-0.3, 0.3, 1000)
+    x = np.ones_like(z)*ldict['xlsb']
+    y = np.ones_like(z)*ldict['ylsb']
+    neLISM, FLISM, wLISM = lism.ne_LISM(x,y,z, ldict)
+    assert np.isclose(neLISM[0], 0.016)
+    assert np.isclose(neLISM[-1], 0.0)
+
 def test_DRQ1():
     """ Test DRQ1 density
     """

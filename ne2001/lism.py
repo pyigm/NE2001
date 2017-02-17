@@ -29,6 +29,55 @@ import ne2001
 from ne2001 import io as io_ne2001
 
 
+
+def ne_LISM(x,y,z, ldict):
+    """
+    Parameters
+    ----------
+    x
+    y
+    z
+    ldict
+
+    Returns
+    -------
+
+    """
+                          #  wldr, wlhb,wlsb,wloopI)
+
+    #real nelsbxyz, nelhbxyz, neldrq1xyz, neloopIxyz
+    #real FLDRQ1r, FLSBr, FLHBr, FLOOPIr		! 'r' for returned value
+    #integer wLDR, wLSB, wLHB, wLOOPI
+
+    #character*48 path
+    #character*120 nelisminp
+
+    neldrq1xyz, FLDRQ1r, wLDR = neLSB_or_LDRQ1(x,y,z,ldict,'DRQ1')	#! low density region in Q1
+    nelsbxyz, FLSBr, wLSB  = neLSB_or_LDRQ1(x,y,z,ldict,'LSB')      #! Local Super Bubble
+    nelhbxyz, FLHBr, wLHB = neLHB2(x,y,z,ldict)		#! Local Hot Bubble
+    neloopIxyz, FLOOPIr, wLOOPI = neLOOPI(x,y,z,ldict) #	! Loop I
+
+
+    #c weight the terms so that the LHB term overrides the other
+    #c terms (we want the density to be low in the LHB, lower than
+    #c in the other terms.
+
+    neLISM =   (1-wLHB) * (
+                   (1-wLOOPI) * (wLSB*nelsbxyz + (1-wLSB)*neldrq1xyz)
+                   + wLOOPI * neloopIxyz ) + wLHB  * nelhbxyz
+
+    FLISM = (1-wLHB) * (
+                   (1-wLOOPI) * (wLSB*FLSBr + (1-wLSB)*FLDRQ1r)
+                   + wLOOPI * FLOOPIr ) +   wLHB  * FLHBr
+
+    #c return the maximum weight of any of the terms for
+    #c combining with additional terms external to this routine.
+
+    wLISM = np.maximum(wLOOPI, np.maximum(wLDR, np.maximum(wLSB, wLHB)))
+
+    return neLISM, FLISM, wLISM
+
+
 def neLSB_or_LDRQ1(x,y,z, ldict, region): #	! Local Super Bubble or Low Density Region in Q1
     """
     Parameters
@@ -38,9 +87,15 @@ def neLSB_or_LDRQ1(x,y,z, ldict, region): #	! Local Super Bubble or Low Density 
     z
     ldict : dict
       LISM parameters
+    region : str
+      'LSB' : Local super bubble
+      'DRQ1' : Low density region in Q1
 
     Returns
     -------
+    ne : ndarray or float
+    F : ndarray or float
+    w : ndarray or int
 
     c input:
     c 	x,y,z = coordinates w.r.t. Galaxy as in TC93, CL00
@@ -114,6 +169,7 @@ def neLSB_or_LDRQ1(x,y,z, ldict, region): #	! Local Super Bubble or Low Density 
 
 def neLHB2(x,y,z, ldict):
     """ Local Hot Bubble
+
     Parameters
     ----------
     x
