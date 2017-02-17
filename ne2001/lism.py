@@ -29,7 +29,7 @@ import ne2001
 from ne2001 import io as io_ne2001
 
 
-def neLSB(x,y,z, ldict): #	! Local Super Bubble
+def neLSB_or_LDRQ1(x,y,z, ldict, region): #	! Local Super Bubble or Low Density Region in Q1
     """
     Parameters
     ----------
@@ -72,12 +72,18 @@ def neLSB(x,y,z, ldict): #	! Local Super Bubble
 
     radian = 180./np.pi #57.29577951)
 
-    aa=ldict['alsb']
-    bb=ldict['blsb']
-    cc=ldict['clsb']
-    theta=ldict['thetalsb']
-    netrough=ldict['nelsb']
-    Ftrough=ldict['Flsb']
+    if region == 'LSB':
+        akey, bkey, ckey, thkey, nekey, Fkey = 'alsb', 'blsb', 'clsb', 'thetalsb', 'nelsb', 'Flsb',
+        xkey, ykey, zkey = [ss+'lsb' for ss in ['x','y','z']]
+    elif region == 'DRQ1':
+        akey, bkey, ckey, thkey, nekey, Fkey = 'aldr', 'bldr', 'cldr', 'thetaldr', 'neldr', 'Fldr',
+        xkey, ykey, zkey = [ss+'ldr' for ss in ['x','y','z']]
+    aa=ldict[akey]
+    bb=ldict[bkey]
+    cc=ldict[ckey]
+    theta=ldict[thkey]
+    netrough=ldict[nekey]
+    Ftrough=ldict[Fkey]
 
     s = np.sin(theta/radian)
     c = np.cos(theta/radian)
@@ -86,24 +92,24 @@ def neLSB(x,y,z, ldict): #	! Local Super Bubble
     cp = 1./cc**2
     dp =  2.*c*s*(1./aa**2 - 1./bb**2)
 
-    ne_LSB = np.zeros_like(x)
-    wLSB = np.zeros_like(x).astype(int)
-    FLSBr = np.zeros_like(x)
+    ne = np.zeros_like(x)
+    w = np.zeros_like(x).astype(int)
+    F = np.zeros_like(x)
 
     # Geometry
-    q = ap*(x-ldict['xlsb'])**2 + bp*(y-ldict['ylsb'])**2 + (
-        cp*(z-ldict['zlsb'])**2 + (x-ldict['xlsb'])*(y-ldict['ylsb'])*dp)
+    q = ap*(x-ldict[xkey])**2 + bp*(y-ldict[ykey])**2 + (
+        cp*(z-ldict[zkey])**2 + (x-ldict[xkey])*(y-ldict[ykey])*dp)
     inside = q <= 1.
-    ne_LSB[inside] = netrough
-    FLSBr[inside] = Ftrough
-    wLSB[inside] = 1
+    ne[inside] = netrough
+    F[inside] = Ftrough
+    w[inside] = 1
     # Float?
     if flg_float:
-        ne_LSB = float(ne_LSB[0])
-        FLSBr = float(FLSBr[0])
-        wLSB = int(wLSB[0])
+        ne = float(ne[0])
+        F= float(F[0])
+        w= int(w[0])
 
-    return ne_LSB, FLSBr, wLSB
+    return ne, F, w
 
 
 def neLHB2(x,y,z, ldict):

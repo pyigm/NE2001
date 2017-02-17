@@ -16,19 +16,36 @@ def data_path(filename):
     return os.path.join(data_dir, filename)
 
 
+def test_DRQ1():
+    """ Test DRQ1 density
+    """
+    ldict = ne_io.read_lism()
+    # Float at center
+    x,y,z = [ldict[key] for key in ['xldr', 'yldr', 'zldr']]
+    ne_DRQ1, FDRQ1, wDRQ1 = lism.neLSB_or_LDRQ1(x,y,z, ldict, 'DRQ1')
+    assert np.isclose(ne_DRQ1, ldict['neldr'])
+    # Array
+    z = np.linspace(-0.3, 3.3, 1000)
+    x = np.ones_like(z)*ldict['xldr']
+    y = np.ones_like(z)*ldict['yldr']
+    ne_DRQ1, FDRQ1, wDRQ1 = lism.neLSB_or_LDRQ1(x,y,z, ldict, 'DRQ1')
+    assert np.isclose(ne_DRQ1[0], ldict['neldr'])
+    assert np.isclose(ne_DRQ1[-1], 0.)
+
+
 def test_LSB():
     """ Test LSB density
     """
     ldict = ne_io.read_lism()
     # Float at center
     x,y,z = [ldict[key] for key in ['xlsb', 'ylsb', 'zlsb']]
-    ne_LSB, FLSB, wLSB = lism.neLSB(x,y,z, ldict)
+    ne_LSB, FLSB, wLSB = lism.neLSB_or_LDRQ1(x,y,z, ldict, 'LSB')
     assert np.isclose(ne_LSB, ldict['nelsb'])
     # Array
     z = np.linspace(-0.3, 0.3, 1000)
     x = np.ones_like(z)*ldict['xlsb']
     y = np.ones_like(z)*ldict['ylsb']
-    ne_LSB, FLSB, wLSB = lism.neLSB(x,y,z, ldict)
+    ne_LSB, FLSB, wLSB = lism.neLSB_or_LDRQ1(x,y,z, ldict, 'LSB')
     assert np.isclose(ne_LSB[0], ldict['nelsb'])
     assert np.isclose(ne_LSB[-1], 0.)
 
