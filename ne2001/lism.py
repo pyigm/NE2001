@@ -29,14 +29,181 @@ import ne2001
 from ne2001 import io as io_ne2001
 
 
-
-def neLOOPI(x,y,z): #	! Loop I
+def neLSB(x,y,z, ldict): #	! Local Super Bubble
     """
     Parameters
     ----------
     x
     y
     z
+    ldict : dict
+      LISM parameters
+
+    Returns
+    -------
+
+    c input:
+    c 	x,y,z = coordinates w.r.t. Galaxy as in TC93, CL00
+    c output:
+    c	neLSB = electron density in local hot bubble that
+    c	        is modeled as an ellisoidal trough.
+    c	FLSB = fluctuation parameter
+    c	wLSB  = weight of LSB component used to combine
+    c		with other components of electron density.
+    c		wLSB =  1  at and inside the annular ridge
+    c		     <  1  outside the annular ridge
+    c	             -> 0  far outside the annular ridge
+    c	e.g. total electron density would be evaluated as
+    c            ne = (1-wLSB)*ne_other + neLSB
+    """
+    #real aa,bb,cc			! scales of ellipsoidal ridge
+    #real netrough			! ne of annulus, trough
+    #real Ftrough			! fluctuation parameters
+    #real theta 			! position angle of major axis,
+    #				!    measured from x axis
+    #				!    (x axis points toward l=90)
+    if isinstance(x,float):
+        x = np.array([x])
+        y = np.array([y])
+        z = np.array([z])
+        flg_float = True
+    else:
+        flg_float = False
+
+    radian = 180./np.pi #57.29577951)
+
+    aa=ldict['alsb']
+    bb=ldict['blsb']
+    cc=ldict['clsb']
+    theta=ldict['thetalsb']
+    netrough=ldict['nelsb']
+    Ftrough=ldict['Flsb']
+
+    s = np.sin(theta/radian)
+    c = np.cos(theta/radian)
+    ap = (c/aa)**2 + (s/bb)**2
+    bp = (s/aa)**2 + (c/bb)**2
+    cp = 1./cc**2
+    dp =  2.*c*s*(1./aa**2 - 1./bb**2)
+
+    ne_LSB = np.zeros_like(x)
+    wLSB = np.zeros_like(x).astype(int)
+    FLSBr = np.zeros_like(x)
+
+    # Geometry
+    q = ap*(x-ldict['xlsb'])**2 + bp*(y-ldict['ylsb'])**2 + (
+        cp*(z-ldict['zlsb'])**2 + (x-ldict['xlsb'])*(y-ldict['ylsb'])*dp)
+    inside = q <= 1.
+    ne_LSB[inside] = netrough
+    FLSBr[inside] = Ftrough
+    wLSB[inside] = 1
+    # Float?
+    if flg_float:
+        ne_LSB = float(ne_LSB[0])
+        FLSBr = float(FLSBr[0])
+        wLSB = int(wLSB[0])
+
+    return ne_LSB, FLSBr, wLSB
+
+
+def neLHB2(x,y,z, ldict):
+    """ Local Hot Bubble
+    Parameters
+    ----------
+    x
+    y
+    z
+    ldict
+
+    Returns
+    -------
+    ne_LHB2 :
+
+    c LHB modeled as a cylinder
+    c the cylinder slants in the y direction vs. z as described by parameter yzslope
+    c the cylinder cross-sectional size in the 'a' direction (major axis)
+    c       varies with z, tending to zero at its smallest z point.
+        implicit none
+        real x,y,z,FLHBr
+        integer wLHB
+    c input:
+    c 	x,y,z = coordinates w.r.t. Galaxy as in TC93, CL00
+    c output:
+    c	neLHB2 = electron density in local hot bubble that
+    c	        is modeled as an ellisoidal trough.
+    c	FLHB = fluctuation parameter
+    c	wLHB  = weight of LBH component used to combine
+    c		with other components of electron density.
+    c		wLHB =  1  at and inside the annular ridge
+    c		     <  1  outside the annular ridge
+    c	             -> 0  far outside the annular ridge
+    c	e.g. total electron density would be evaluated as
+    c            ne = (1-wLHB)*ne_other + neLHB2
+    """
+    if isinstance(x,float):
+        x = np.array([x])
+        y = np.array([y])
+        z = np.array([z])
+        flg_float = True
+    else:
+        flg_float = False
+    #real aa,bb,cc			! scales of ellipsoidal ridge
+    #real netrough			! ne of annulus, trough
+    #real Ftrough			! fluctuation parameters
+    #real xlhb, ylhb, zlhb		! center of ellipsoid
+    #real theta 			! slant angle in yz plane of cylinder
+    #				!    measured from z axis
+    #real qxy, qz
+    #    real radian
+    #    parameter(radian = 57.29577951)
+    radian = 180./np.pi
+
+    #real yzslope
+    #real yaxis
+
+    # Init
+    bb=ldict['blhb']
+    cc=ldict['clhb']
+    theta=ldict['thetalhb']
+    netrough=ldict['nelhb']
+    Ftrough=ldict['Flhb']
+    yzslope = np.tan(theta/radian)
+
+    ne_LHB2 = np.zeros_like(x)
+    wLHB = np.zeros_like(x).astype(int)
+    FLHBr = np.zeros_like(x)
+    yaxis = ldict['ylhb'] + yzslope*z
+    # cylinder has cross sectional area = constant for z>0
+    # area -> 0 for z<0 by letting aa->0 linearly for z<0:
+    # (0.001 = 1 pc is to avoid divide by zero)
+    aa = np.ones_like(x) * ldict['alhb']
+    neg_z = (z <= 0.) & (z >= ldict['zlhb']-ldict['clhb'])
+    aa[neg_z] = 0.001 + (ldict['alhb']-0.001)*(
+        1. - (1./(ldict['zlhb']-ldict['clhb']))*z[neg_z])
+    qxy =  ( (x-ldict['xlhb'])/aa )**2 + ( (y-yaxis)/bb )**2
+    qz =  np.abs(z-ldict['zlhb'])/cc
+    # Inside?
+    inside = (qxy <= 1.0) & (qz <= 1.0)
+    ne_LHB2[inside] = netrough
+    FLHBr[inside] = Ftrough
+    wLHB[inside] = 1
+    # Recast?
+    if flg_float:
+        ne_LHB2 = float(ne_LHB2[0])
+        FLHBr = float(FLHBr[0])
+        wLHB = int(wLHB[0])
+    # Return
+    return ne_LHB2, FLHBr, wLHB
+
+
+def neLOOPI(x,y,z, ldict): #	! Loop I
+    """
+    Parameters
+    ----------
+    x
+    y
+    z
+    ldict : dict
     FLOOPI
     wLOOPI
 
@@ -59,7 +226,6 @@ def neLOOPI(x,y,z): #	! Loop I
     c		wLOOPI =  1  at and inside the annular ridge
     c		       <  1  outside the annular ridge
     """
-    ldict = io_ne2001.read_lism()
     #real r
     #real a1, a2
     #logical first
@@ -87,14 +253,20 @@ def neLOOPI(x,y,z): #	! Loop I
     r = np.sqrt( (x-ldict['xlpI'])**2 + (y-ldict['ylpI'])**2 + (z-ldict['zlpI'])**2)
 
     # Inside volume
-    in_a1 = r < ldict['a1']
+    in_a1 = r < a1
     ne_LOOPI[gd_z & in_a1] = ldict['nelpI']
     FLOOPI[gd_z & in_a1] = ldict['FlpI']
     wLOOPI[gd_z & in_a1] = 1
     # Boundary Shell
-    in_shell = (r >= ldict['a1']) & (r < ldict['a2'])
+    in_shell = (r >= a1) & (r < a2)
     ne_LOOPI[gd_z & in_shell] = ldict['dnelpI']
     FLOOPI[gd_z & in_shell] = ldict['dFlpI']
     wLOOPI[gd_z & in_shell] = 1
+
+    # Float?
+    if flg_float:
+        ne_LOOPI = float(ne_LOOPI[0])
+        FLOOPI = float(FLOOPI[0])
+        wLOOPI = int(wLOOPI[0])
 
     return ne_LOOPI, FLOOPI, wLOOPI

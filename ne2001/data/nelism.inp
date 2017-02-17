@@ -10,4 +10,6 @@
 15 0.005 0.01 | thetalhb, nelhb, Flhb
 -0.045 8.40 0.07 | xlpI, ylpI, zlpI
 0.120 0.060 | rlpI, drlpI
-0.0125 0.0125 0.2 0.01 | nelpI, dnelpI, FlpI, dFlpi
+# Adjusting dnelpI according to Cordes astro-ph
+# Also capitalized I in dFlpI
+0.0125 0.010 0.2 0.01 | nelpI, dnelpI, FlpI, dFlpI
