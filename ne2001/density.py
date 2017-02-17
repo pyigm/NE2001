@@ -10,6 +10,20 @@ from ne2001 import io as io_ne2001
 
 def ne_GC(x, y, z, FORTRAN_NE2001=True):
     """
+    Parameters
+    ----------
+    x
+    y
+    z
+    FORTRAN_NE2001 : bool, optional
+      Use the original algorithm in the FORTRAN code?
+      This differs from the last astro-ph posting
+
+    Returns
+    -------
+    ne_gc : ndarray or float
+    F_gc : ndarray or float
+
     c-----------------------------------------------------------------------
     c     Determines the contribution of the Galactic center to the free
     c     electron density of the interstellar medium at Galactic location
@@ -108,6 +122,18 @@ def ne_GC(x, y, z, FORTRAN_NE2001=True):
 
 def ne_spiral_arm(x,y,z, gal_param):
     """
+    Parameters
+    ----------
+    x
+    y
+    z
+    gal_param
+
+    Returns
+    -------
+    nea : ndarray or float
+    whicharm : ndarray or int
+
     c-----------------------------------------------------------------------
     c  Spiral arms are defined as logarithmic spirals using the
     c    parameterization in Wainscoat et al. 1992, ApJS, 83, 111-146.
@@ -311,9 +337,15 @@ def ne_thin(x,y,z, gal_param, FORTRAN_NE2001=True):
     y
     z
     gal_param : dict
+    FORTRAN_NE2001 : bool, optional
+      Use the original algorithm in the FORTRAN code?
+      This differs from the last astro-ph posting
 
     Returns
     -------
+    ne_inn : ndarray or float
+    F_inner : ndarray or float
+
     c-----------------------------------------------------------------------
     c Thin disk (inner Galaxy) component:
     c (referred to as 'Galactic center component' in circa TC93 density.f)
@@ -348,10 +380,20 @@ def ne_thin(x,y,z, gal_param, FORTRAN_NE2001=True):
 
 def ne_thick(x,y,z, gal_param):
     """
+    Parameters
+    ----------
+    x : ndarray or float
+    y : ndarray or float
+    z : ndarray or float
+    gal_param : dict
+
+    Returns
+    -------
+    ne_out : ndarray or float
+    F_outer : ndarray or float
+
     c-----------------------------------------------------------------------
     c Thick disk component:
-    implicit none
-    real x,y,z, F_outer
     """
     #parameter(pihalf=3.14159 26535 89793 23846 264/2.0)
 # 	g1=sech2(rr/A1)/sech2(8.5/A1)		! TC93 function
