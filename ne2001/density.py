@@ -414,7 +414,8 @@ def ne_thick(x,y,z, gal_param):
         else:
             g1[gd_rr] = np.cos(np.pi*rr[gd_rr]/gal_param['A1']/2.)/suncos
     # ne1
-    ne1 = (gal_param['n1h1']/gal_param['h1'])*g1 / np.cosh(z/gal_param['h1'])**2
+    pdb.set_trace()
+    ne1 = (gal_param['n1h1']/gal_param['h1'])*g1 / (np.cosh(z/gal_param['h1']))**2
     # Finish
     ne_out = ne1
     F_outer = gal_param['F1']

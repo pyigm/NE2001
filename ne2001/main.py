@@ -15,6 +15,7 @@ from __future__ import print_function, absolute_import, division, unicode_litera
 from ne2001 import density
 from ne2001 import lism
 
+
 def density_2001(x,y,z, gal_param, ldict, mflags, **kwargs):
     """
     Parameters
@@ -28,6 +29,8 @@ def density_2001(x,y,z, gal_param, ldict, mflags, **kwargs):
 
     Returns
     -------
+    out_dict : dict
+      Contains all the info
 
     c----------------------------------------------------------------------------
     c  Returns seven components of the free electron density of the
@@ -104,6 +107,7 @@ def density_2001(x,y,z, gal_param, ldict, mflags, **kwargs):
     # Output dict
 
     return out_dict
+
 
 def NE2001_dens():
     """
