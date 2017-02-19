@@ -25,10 +25,6 @@ from __future__ import print_function, absolute_import, division, unicode_litera
 import numpy as np
 import pdb
 
-import ne2001
-from ne2001 import io as io_ne2001
-
-
 
 def ne_LISM(x,y,z, ldict):
     """
@@ -41,6 +37,9 @@ def ne_LISM(x,y,z, ldict):
 
     Returns
     -------
+    neLISM : ndarray or float
+    FLISM : ndarray or float
+    wLISM : ndarray or int
 
     """
                           #  wldr, wlhb,wlsb,wloopI)
@@ -62,7 +61,7 @@ def ne_LISM(x,y,z, ldict):
     #c terms (we want the density to be low in the LHB, lower than
     #c in the other terms.
 
-    neLISM =   (1-wLHB) * (
+    neLISM = (1-wLHB) * (
                    (1-wLOOPI) * (wLSB*nelsbxyz + (1-wLSB)*neldrq1xyz)
                    + wLOOPI * neloopIxyz ) + wLHB  * nelhbxyz
 
@@ -78,7 +77,7 @@ def ne_LISM(x,y,z, ldict):
     return neLISM, FLISM, wLISM
 
 
-def neLSB_or_LDRQ1(x,y,z, ldict, region): #	! Local Super Bubble or Low Density Region in Q1
+def neLSB_or_LDRQ1(x,y,z, ldict, region):  # ! Local Super Bubble or Low Density Region in Q1
     """
     Parameters
     ----------

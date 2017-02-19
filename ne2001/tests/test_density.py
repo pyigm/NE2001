@@ -79,8 +79,11 @@ def test_thick():
     gal_param = ne_io.read_galparam()
     # Float
     x,y,z = 1.,10.,1
+    #ne_out, F_inner = density.ne_thick(x,y,z, gal_param)
+    #assert np.isclose(ne_out, 0.011686894112477935, rtol=1e-7)
+    # Solar
+    x,y,z = 0., 8.5, 0.
     ne_out, F_inner = density.ne_thick(x,y,z, gal_param)
-    assert np.isclose(ne_out, 0.011686894112477935, rtol=1e-7)
     # Array
     z = np.linspace(0.1, 1.0, 100)
     x = np.ones_like(z)
